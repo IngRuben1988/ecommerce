@@ -1,0 +1,96 @@
+<!-- Components/Pages/Login.razor -->
+@page "/login"
+@* No necesitas @layout MainLayout si es el DefaultLayout en Routes.razor *@
+@rendermode InteractiveServer
+@inject NavigationManager NavigationManager
+@inject ECommerceServer.Services.SimulatedAuthStateService AuthStateService
+
+@* ... (el HTML del formulario de login no cambia) ... *@
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="text-center">Iniciar Sesión</h3>
+                </div>
+                <div class="card-body">
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <div class="alert alert-danger" role="alert">
+                            @errorMessage
+                        </div>
+                    }
+
+                    <EditForm Model="@loginModel" OnValidSubmit="HandleLoginAsync">
+                        <DataAnnotationsValidator />
+
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Usuario:</label>
+                            <InputText id="username" class="form-control" @bind-Value="loginModel.Username" placeholder="admin" />
+                            <ValidationMessage For="@(() => loginModel.Username)" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Contraseña:</label>
+                            <InputText id="password" type="password" class="form-control" @bind-Value="loginModel.Password" placeholder="password" />
+                            <ValidationMessage For="@(() => loginModel.Password)" />
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">Entrar</button>
+                        </div>
+                    </EditForm>
+                </div>
+                <div class="card-footer text-center">
+                    <small>© @DateTime.Now.Year E-Shop Demo</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@code {
+    private LoginInputModel loginModel = new LoginInputModel();
+    private string? errorMessage;
+
+    protected override void OnInitialized()
+    {
+        // Si el usuario ya está "logueado" y navega a /login, redirigirlo.
+        if (AuthStateService.IsLoggedIn)
+        {
+            NavigationManager.NavigateTo("/");
+        }
+    }
+
+    private async Task HandleLoginAsync()
+    {
+        errorMessage = null;
+
+        if (loginModel.Username == "admin" && loginModel.Password == "password")
+        {
+            AuthStateService.Login(loginModel.Username); // Llama al servicio para "loguear"
+            NavigationManager.NavigateTo("/", forceLoad: true); // forceLoad puede ayudar a que NavMenu refresque
+        }
+        else if (loginModel.Username == "user" && loginModel.Password == "1234")
+        {
+            AuthStateService.Login(loginModel.Username);
+            NavigationManager.NavigateTo("/", forceLoad: true); // Ejemplo
+        }
+        else
+        {
+            errorMessage = "Usuario o contraseña incorrectos.";
+        }
+        // No es estrictamente necesario 'await Task.CompletedTask;' si el método ya es async
+        // debido a otras llamadas await, pero no hace daño.
+    }
+
+    public class LoginInputModel
+    {
+        [System.ComponentModel.DataAnnotations.Required(ErrorMessage = "El nombre de usuario es obligatorio.")]
+        public string Username { get; set; } = string.Empty;
+
+        [System.ComponentModel.DataAnnotations.Required(ErrorMessage = "La contraseña es obligatoria.")]
+        public string Password { get; set; } = string.Empty;
+    }
+}

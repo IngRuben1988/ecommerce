@@ -1,0 +1,103 @@
+﻿<!-- Components/Layout/NavMenu.razor -->
+@inject NavigationManager NavigationManager
+@inject ECommerceServer.Services.SimulatedAuthStateService AuthStateService 
+@implements IDisposable
+
+<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">E-Shop Demo</a>
+    </div>
+</div>
+
+<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+
+<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
+    <nav class="flex-column">
+        @if (AuthStateService.IsLoggedIn)
+        {
+            // --- MENÚ PARA USUARIOS LOGUEADOS ---
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                    <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
+                </NavLink>
+            </div>
+
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="weather">
+                    <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
+                </NavLink>
+            </div>
+            // Puedes añadir más enlaces para usuarios logueados aquí
+
+            <div class="nav-item px-3 mt-auto"> @* mt-auto para empujar el logout abajo si es un sidebar largo *@
+                <span class="nav-link text-light">Hola, @AuthStateService.Username!</span>
+            </div>
+            <div class="nav-item px-3">
+                <button class="nav-link btn btn-link w-100 text-start" @onclick="HandleLogout"> @* w-100 text-start para que parezca un NavLink *@
+                    <span class="bi bi-box-arrow-right-nav-menu" aria-hidden="true"></span> Logout
+                </button>
+            </div>
+        }
+        else
+        {
+            // --- MENÚ PARA USUARIOS NO LOGUEADOS ---
+            @* No mostramos "Home" ni "Weather" si no está logueado.
+               Solo mostramos el enlace de Login si NO estamos ya en la página de login. *@
+            @if (!IsOnLoginPage)
+            {
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="login">
+                        <span class="oi oi-list-rich" aria-hidden="true"></span> Login
+                    </NavLink>
+                </div>
+            }
+            // Podrías tener un enlace a una página "Acerca de" pública aquí, por ejemplo.
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="public-info"> @* Ejemplo de página pública *@
+                    <span class="bi bi-info-circle-fill-nav-menu" aria-hidden="true"></span> Información
+                </NavLink>
+            </div>
+        }
+    </nav>
+</div>
+
+@code {
+    private bool IsOnLoginPage => NavigationManager.Uri.EndsWith("/login", StringComparison.OrdinalIgnoreCase) ||
+                                  NavigationManager.Uri.Contains("/login?", StringComparison.OrdinalIgnoreCase); // Para cubrir /login?returnUrl=...
+
+    protected override void OnInitialized()
+    {
+        AuthStateService.OnChange += TriggerStateHasChanged;
+        NavigationManager.LocationChanged += HandleLocationChanged;
+        Console.WriteLine($"NavMenu OnInitialized. IsLoggedIn: {AuthStateService.IsLoggedIn}, IsOnLoginPage: {IsOnLoginPage}");
+    }
+
+    private void HandleLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        InvokeAsync(StateHasChanged);
+        Console.WriteLine($"NavMenu LocationChanged: {e.Location}. IsOnLoginPage: {IsOnLoginPage}");
+    }
+
+    private void TriggerStateHasChanged()
+    {
+        InvokeAsync(StateHasChanged);
+        Console.WriteLine($"NavMenu AuthStateChanged. IsLoggedIn: {AuthStateService.IsLoggedIn}");
+    }
+
+    private void HandleLogout()
+    {
+        Console.WriteLine("NavMenu HandleLogout initiated.");
+        AuthStateService.Logout();
+        // Es importante redirigir DESPUÉS de que el estado se haya actualizado.
+        // forceLoad: true puede ayudar a que el servidor y el cliente estén completamente sincronizados
+        // con el nuevo estado no autenticado, especialmente si hay lógica de autorización
+        // en el servidor que depende de cookies (aunque aquí es simulado).
+        NavigationManager.NavigateTo("/login", forceLoad: true);
+    }
+
+    public void Dispose()
+    {
+        AuthStateService.OnChange -= TriggerStateHasChanged;
+        NavigationManager.LocationChanged -= HandleLocationChanged;
+    }
+}
