@@ -13,18 +13,17 @@
 
 <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
     <nav class="flex-column">
+       <!-- <p style="color:lime; font-size:0.7em;">
+    DEBUG NavMenu Render: IsLoggedIn=@AuthStateService.IsLoggedIn,
+    User=@(AuthStateService.Username ?? "NULL"),
+    ServiceHash=@AuthStateService.GetHashCode()
+    </p>-->
         @if (AuthStateService.IsLoggedIn)
         {
             // --- MENÚ PARA USUARIOS LOGUEADOS ---
             <div class="nav-item px-3">
                 <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                    <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
-                </NavLink>
-            </div>
-
-            <div class="nav-item px-3">
-                <NavLink class="nav-link" href="weather">
-                    <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
+                    <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Products
                 </NavLink>
             </div>
             // Puedes añadir más enlaces para usuarios logueados aquí
@@ -51,12 +50,6 @@
                     </NavLink>
                 </div>
             }
-            // Podrías tener un enlace a una página "Acerca de" pública aquí, por ejemplo.
-            <div class="nav-item px-3">
-                <NavLink class="nav-link" href="public-info"> @* Ejemplo de página pública *@
-                    <span class="bi bi-info-circle-fill-nav-menu" aria-hidden="true"></span> Información
-                </NavLink>
-            </div>
         }
     </nav>
 </div>
@@ -81,7 +74,7 @@
     private void TriggerStateHasChanged()
     {
         InvokeAsync(StateHasChanged);
-        Console.WriteLine($"NavMenu AuthStateChanged. IsLoggedIn: {AuthStateService.IsLoggedIn}");
+        Console.WriteLine($"NavMenu AuthStateChanged. IsLoggedIn: {AuthStateService.IsLoggedIn}, Username: {AuthStateService.Username}");
     }
 
     private void HandleLogout()

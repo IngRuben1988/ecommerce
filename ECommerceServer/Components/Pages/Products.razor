@@ -1,0 +1,59 @@
+@page "/products"
+
+@using System.Collections.Generic
+
+<h1 class="text-2xl font-bold mb-4">Tienda Online</h1>
+
+<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+    @foreach (var producto in productos)
+    {
+        <div class="border rounded-lg p-4 shadow-md">
+            <img src="@producto.ImagenUrl" alt="@producto.Nombre" class="w-full h-48 object-cover mb-2" />
+            <h2 class="text-lg font-semibold">@producto.Nombre</h2>
+            <p class="text-green-600 font-bold">@producto.Precio.ToString("C")</p>
+            <button class="bg-blue-600 text-white px-3 py-1 mt-2 rounded hover:bg-blue-700" @onclick="() => AgregarAlCarrito(producto)">
+                Agregar al carrito
+            </button>
+        </div>
+    }
+</div>
+
+@if (carrito.Count > 0)
+{
+    <div class="mt-6 border-t pt-4">
+        <h2 class="text-xl font-bold">Carrito</h2>
+        <ul>
+            @foreach (var item in carrito)
+            {
+                <li>@item.Nombre - @item.Precio.ToString("C")</li>
+            }
+        </ul>
+        <p class="font-semibold mt-2">Total: @carrito.Sum(p => p.Precio).ToString("C")</p>
+    </div>
+}
+
+@code {
+    private List<Producto> productos = new()
+    {
+        new Producto { Nombre = "Biga", Precio = 999.99m, ImagenUrl = "https://via.placeholder.com/200x150?text=Laptop" },
+        new Producto { Nombre = "Ladrillo", Precio = 699.99m, ImagenUrl = "https://via.placeholder.com/200x150?text=Smartphone" },
+        new Producto { Nombre = "Cemento", Precio = 149.99m, ImagenUrl = "https://via.placeholder.com/200x150?text=Audifonos" },
+        new Producto { Nombre = "Pala", Precio = 89.99m, ImagenUrl = "https://via.placeholder.com/200x150?text=Teclado" },
+        new Producto { Nombre = "Escoba", Precio = 399.99m, ImagenUrl = "https://via.placeholder.com/200x150?text=Monitor" },
+    };
+
+    private List<Producto> carrito = new();
+
+    private void AgregarAlCarrito(Producto producto)
+    {
+        carrito.Add(producto);
+    }
+
+    public class Producto
+    {
+        public string? Nombre { get; set; }
+        public decimal Precio { get; set; }
+        public string? ImagenUrl { get; set; }
+    }
+}
+

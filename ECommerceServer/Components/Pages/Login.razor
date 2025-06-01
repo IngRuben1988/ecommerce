@@ -1,7 +1,8 @@
 <!-- Components/Pages/Login.razor -->
 @page "/login"
-@* No necesitas @layout MainLayout si es el DefaultLayout en Routes.razor *@
+@* No tiene una directiva @layout explícita *@
 @rendermode InteractiveServer
+<!-- ... contenido del login ... -->
 @inject NavigationManager NavigationManager
 @inject ECommerceServer.Services.SimulatedAuthStateService AuthStateService
 
@@ -75,7 +76,7 @@
         else if (loginModel.Username == "user" && loginModel.Password == "1234")
         {
             AuthStateService.Login(loginModel.Username);
-            NavigationManager.NavigateTo("/", forceLoad: true); // Ejemplo
+            NavigationManager.NavigateTo("/products", forceLoad: true); // Ejemplo
         }
         else
         {

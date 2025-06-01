@@ -8,10 +8,11 @@ namespace ECommerceServer.Services // Ajusta el namespace a tu proyecto
 
         public event Action? OnChange;
 
+        // Services/SimulatedAuthStateService.cs
         public void Login(string username)
         {
             IsLoggedIn = true;
-            Username = username;
+            Username = username; // Asegúrate que 'username' que pasas desde Login.razor no sea null o vacío
             NotifyStateChanged();
             Console.WriteLine($"SimulatedAuthStateService: User '{Username}' logged in.");
         }
@@ -20,10 +21,15 @@ namespace ECommerceServer.Services // Ajusta el namespace a tu proyecto
         {
             IsLoggedIn = false;
             Username = null;
+            Console.WriteLine($"SimulatedAuthStateService Logout: IsLoggedIn={IsLoggedIn}. HashCode: {this.GetHashCode()}");
             NotifyStateChanged();
-            Console.WriteLine("SimulatedAuthStateService: User logged out.");
         }
 
-        private void NotifyStateChanged() => OnChange?.Invoke();
+        private void NotifyStateChanged()
+        {
+            Console.WriteLine($"SimulatedAuthStateService NotifyStateChanged called. IsLoggedIn={IsLoggedIn}. HashCode: {this.GetHashCode()}");
+            OnChange?.Invoke();
+        }
+
     }
 }
