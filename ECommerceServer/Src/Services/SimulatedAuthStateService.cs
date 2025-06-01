@@ -1,5 +1,5 @@
 // Services/SimulatedAuthStateService.cs
-namespace ECommerceServer.Services // Ajusta el namespace a tu proyecto
+namespace ECommerceServer.Src.Services // Ajusta el namespace a tu proyecto
 {
     public class SimulatedAuthStateService
     {

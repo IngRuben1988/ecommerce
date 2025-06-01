@@ -1,6 +1,6 @@
 // Program.cs
-using ECommerceServer.Components; // Ajusta el namespace
-using ECommerceServer.Services;
+using ECommerceServer.Src.Components; // Ajusta el namespace
+using ECommerceServer.Src.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;   // Ajusta el namespace
 
 var builder = WebApplication.CreateBuilder(args);
