@@ -1,0 +1,60 @@
+<!-- Components/Shared/SimpleModal.razor (Versión Bootstrap) -->
+@inject IJSRuntime JSRuntime
+
+@if (IsVisible)
+{
+    <div class="modal fade show" tabindex="-1" role="dialog" style="display: block; background-color: rgba(0,0,0,0.5);" @onclick="AttemptCloseModalOutside">
+        <div class="modal-dialog modal-dialog-centered" role="document" @onclick:stopPropagation="true">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@Title</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" @onclick="CloseModalAndNotify"></button>
+                </div>
+                <div class="modal-body">
+                    <p>@Message</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" @onclick="CloseModalAndNotify">@ConfirmButtonText</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public bool IsVisible { get; set; }
+    [Parameter] public string Title { get; set; } = "Notificación";
+    [Parameter] public string Message { get; set; } = "Operación completada.";
+    [Parameter] public string ConfirmButtonText { get; set; } = "Aceptar";
+
+    [Parameter] public EventCallback OnClose { get; set; }
+
+    private async Task CloseModalAndNotify()
+    {
+        // IsVisible se controlará desde el padre, pero podemos invocar OnClose
+        if (OnClose.HasDelegate)
+        {
+            await OnClose.InvokeAsync();
+        }
+    }
+
+    private async Task AttemptCloseModalOutside()
+    {
+        // Comportamiento típico de modal: cerrar al hacer clic fuera
+        await CloseModalAndNotify();
+    }
+
+    // Opcional: Usar JS para forzar el cierre si la lógica Blazor no es suficiente
+    // protected override async Task OnParametersSetAsync()
+    // {
+    //     if (IsVisible)
+    //     {
+    //         // Podrías necesitar un ID único para el modal si tienes múltiples
+    //         // await JSRuntime.InvokeVoidAsync("bootstrapModal", $"#simpleModal-{GetHashCode()}", "show");
+    //     }
+    //     else
+    //     {
+    //         // await JSRuntime.InvokeVoidAsync("bootstrapModal", $"#simpleModal-{GetHashCode()}", "hide");
+    //     }
+    // }
+}

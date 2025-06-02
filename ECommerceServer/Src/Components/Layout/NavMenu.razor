@@ -1,90 +1,96 @@
-﻿<!-- Components/Layout/NavMenu.razor -->
+﻿<!-- Components/Layout/NavMenu.razor (Modificado para Navbar Superior) -->
 @inject NavigationManager NavigationManager
-@inject ECommerceServer.Src.Services.SimulatedAuthStateService AuthStateService 
+@inject ECommerceServer.Src.Services.SimulatedAuthStateService AuthStateService
 @implements IDisposable
 
-<div class="top-row ps-3 navbar navbar-dark">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark"> @* Clases principales de Bootstrap para la navbar *@
     <div class="container-fluid">
         <a class="navbar-brand" href="">E-Shop Demo</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation" @onclick="ToggleNavMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse @NavMenuCssClass" id="navbarNav">
+            <ul class="navbar-nav ms-auto mb-2 mb-lg-0"> @* ms-auto para alinear a la derecha, o me-auto para izquierda *@
+
+                @if (AuthStateService.IsLoggedIn)
+                {
+                    // --- MENÚ PARA USUARIOS LOGUEADOS ---
+                    <li class="nav-item">
+                        <NavLink class="nav-link" href="/products" Match="NavLinkMatch.Prefix"> @* Cambiado href a /products *@
+                            Products
+                        </NavLink>
+                    </li>
+                    @* Puedes añadir más NavLink como <li> aquí *@
+
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownUser" role="button" data-bs-toggle="dropdown" aria-expanded="false"  @onclick="HandleLogout">
+                            Hola, @AuthStateService.Username!
+                        </a>
+                        
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownUser">
+                            <li><a class="dropdown-item" href="#">Mi Perfil (Ejemplo)</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <button class="dropdown-item" @onclick="HandleLogout">Logout</button>
+                            </li>
+                        </ul>
+                    </li>
+                }
+                else
+                {
+                    // --- MENÚ PARA USUARIOS NO LOGUEADOS ---
+                    @if (!IsOnLoginPage)
+                    {
+                        <li class="nav-item">
+                            <NavLink class="nav-link" href="login">
+                                Login
+                            </NavLink>
+                        </li>
+                    }
+                }
+            </ul>
+        </div>
     </div>
-</div>
-
-<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
-
-<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-    <nav class="flex-column">
-       <!-- <p style="color:lime; font-size:0.7em;">
-    DEBUG NavMenu Render: IsLoggedIn=@AuthStateService.IsLoggedIn,
-    User=@(AuthStateService.Username ?? "NULL"),
-    ServiceHash=@AuthStateService.GetHashCode()
-    </p>-->
-        @if (AuthStateService.IsLoggedIn)
-        {
-            // --- MENÚ PARA USUARIOS LOGUEADOS ---
-            <div class="nav-item px-3">
-                <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                    <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Products
-                </NavLink>
-            </div>
-            // Puedes añadir más enlaces para usuarios logueados aquí
-
-            <div class="nav-item px-3 mt-auto"> @* mt-auto para empujar el logout abajo si es un sidebar largo *@
-                <span class="nav-link text-light">Hola, @AuthStateService.Username!</span>
-            </div>
-            <div class="nav-item px-3">
-                <button class="nav-link btn btn-link w-100 text-start" @onclick="HandleLogout"> @* w-100 text-start para que parezca un NavLink *@
-                    <span class="bi bi-box-arrow-right-nav-menu" aria-hidden="true"></span> Logout
-                </button>
-            </div>
-        }
-        else
-        {
-            // --- MENÚ PARA USUARIOS NO LOGUEADOS ---
-            @* No mostramos "Home" ni "Weather" si no está logueado.
-               Solo mostramos el enlace de Login si NO estamos ya en la página de login. *@
-            @if (!IsOnLoginPage)
-            {
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="login">
-                        <span class="oi oi-list-rich" aria-hidden="true"></span> Login
-                    </NavLink>
-                </div>
-            }
-        }
-    </nav>
-</div>
+</nav>
 
 @code {
+    private bool collapseNavMenu = true;
+    private string? NavMenuCssClass => collapseNavMenu ? null : "show";
+
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+
+    // --- Tu código C# existente para IsOnLoginPage, OnInitialized, HandleLocationChanged, etc. ---
+    // --- Pega aquí el bloque @code que ya tenías, EXCEPTO las variables para el toggler si las reemplazas ---
     private bool IsOnLoginPage => NavigationManager.Uri.EndsWith("/login", StringComparison.OrdinalIgnoreCase) ||
-                                  NavigationManager.Uri.Contains("/login?", StringComparison.OrdinalIgnoreCase); // Para cubrir /login?returnUrl=...
+                                  NavigationManager.Uri.Contains("/login?", StringComparison.OrdinalIgnoreCase);
 
     protected override void OnInitialized()
     {
         AuthStateService.OnChange += TriggerStateHasChanged;
         NavigationManager.LocationChanged += HandleLocationChanged;
-        Console.WriteLine($"NavMenu OnInitialized. IsLoggedIn: {AuthStateService.IsLoggedIn}, IsOnLoginPage: {IsOnLoginPage}");
+        // Console.WriteLine($"NavMenu OnInitialized. IsLoggedIn: {AuthStateService.IsLoggedIn}, IsOnLoginPage: {IsOnLoginPage}");
     }
 
     private void HandleLocationChanged(object? sender, LocationChangedEventArgs e)
     {
         InvokeAsync(StateHasChanged);
-        Console.WriteLine($"NavMenu LocationChanged: {e.Location}. IsOnLoginPage: {IsOnLoginPage}");
+        // Console.WriteLine($"NavMenu LocationChanged: {e.Location}. IsOnLoginPage: {IsOnLoginPage}");
     }
 
     private void TriggerStateHasChanged()
     {
         InvokeAsync(StateHasChanged);
-        Console.WriteLine($"NavMenu AuthStateChanged. IsLoggedIn: {AuthStateService.IsLoggedIn}, Username: {AuthStateService.Username}");
+        // Console.WriteLine($"NavMenu AuthStateChanged. IsLoggedIn: {AuthStateService.IsLoggedIn}, Username: {AuthStateService.Username}");
     }
 
     private void HandleLogout()
     {
-        Console.WriteLine("NavMenu HandleLogout initiated.");
+        // Console.WriteLine("NavMenu HandleLogout initiated.");
         AuthStateService.Logout();
-        // Es importante redirigir DESPUÉS de que el estado se haya actualizado.
-        // forceLoad: true puede ayudar a que el servidor y el cliente estén completamente sincronizados
-        // con el nuevo estado no autenticado, especialmente si hay lógica de autorización
-        // en el servidor que depende de cookies (aunque aquí es simulado).
         NavigationManager.NavigateTo("/login", forceLoad: true);
     }
 

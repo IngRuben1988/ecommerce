@@ -1,97 +1,182 @@
+<!-- Components/Pages/Products.razor -->
 @page "/products"
-@inject ECommerceServer.Src.Services.SimulatedAuthStateService AuthStateService 
+@* @layout MainLayout // Esto es implícito si MainLayout es tu DefaultLayout, o puedes ponerlo explícitamente *@
+@inject ECommerceServer.Src.Services.SimulatedAuthStateService AuthStateService
 @inject NavigationManager NavigationManager
 @rendermode InteractiveServer
 
-@* Esta página no mostrará contenido, solo redirigirá.
-   No es estrictamente necesario un @rendermode aquí si solo hace lógica de redirección
-   en OnInitialized. Si tuviera UI que necesitara actualizarse, sí lo necesitaría. *@
+@* Modal de Notificación (como lo definimos antes, usando Bootstrap) *@
+<SimpleModal IsVisible="showNotificationModal"
+             Title="¡Producto Agregado!"
+             Message="@notificationMessage"
+             ConfirmButtonText="Entendido"
+             OnClose="CerrarModalNotificacion" />
 
-@if (isAllowedToView) // Usaremos una variable para controlar la visualización
+@if (isAllowedToView)
 {
-
-    <h1 class="text-2xl font-bold mb-4">Tienda Online</h1>
-
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        @foreach (var producto in productos)
-        {
-            <div class="border rounded-lg p-4 shadow-md">
-                <img src="@producto.ImagenUrl" alt="@producto.Nombre" class="w-full h-48 object-cover mb-2" />
-                <h2 class="text-lg font-semibold">@producto.Nombre</h2>
-                <p class="text-green-600 font-bold">@producto.Precio.ToString("C")</p>
-                <button class="bg-blue-600 text-white px-3 py-1 mt-2 rounded hover:bg-blue-700" @onclick="() => AgregarAlCarrito(producto)">
-                    Agregar al carrito
+    <div class="container py-4"> @* Contenedor principal de Bootstrap con padding vertical *@
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h2">Nuestra Selección de Productos</h1> @* Título más estándar de Bootstrap *@
+            @if (carrito.Count > 0)
+            {
+                <button class="btn btn-outline-primary position-relative" @onclick="ToggleCarritoDisplay">
+                    <i class="bi bi-cart3 me-1"></i>
+                    Carrito
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                        @carrito.Count
+                        <span class="visually-hidden">productos en el carrito</span>
+                    </span>
                 </button>
+            }
+        </div>
+
+
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4"> @* Grid de Bootstrap responsivo *@
+            @foreach (var producto in productos)
+            {
+                <div class="col">
+                    <div class="card h-100 shadow-sm product-card"> @* card, h-100 para misma altura, sombra sutil *@
+                        <img src="@producto.ImagenUrl" alt="@producto.Nombre" class="card-img-top product-image" />
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title product-name">@producto.Nombre</h5>
+                            <p class="card-text product-price mb-auto">@producto.Precio.ToString("C")</p> @* mb-auto para empujar botón abajo *@
+                            <button class="btn btn-primary w-100 mt-2 add-to-cart-btn" @onclick="() => AgregarAlCarritoYMostrarNotificacion(producto)">
+                                <i class="bi bi-cart-plus-fill me-1"></i> Agregar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        @* Sección del Carrito (se muestra/oculta o es un offcanvas) *@
+        @if (showCarrito && carrito.Count > 0)
+        {
+            <div class="mt-5 p-4 border rounded shadow-sm bg-light">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h2 class="h4">Resumen del Carrito</h2>
+                    <button class="btn-close" @onclick="ToggleCarritoDisplay" aria-label="Cerrar carrito"></button>
+                </div>
+                <hr class="my-3">
+                @if (carrito.Any())
+                {
+                    <ul class="list-group list-group-flush mb-3">
+                        @foreach (var item in carrito)
+                        {
+                            <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent px-0">
+                                <div>
+                                    @item.Nombre
+                                    <small class="d-block text-muted">@item.Precio.ToString("C")</small>
+                                </div>
+                                <button class="btn btn-sm btn-outline-danger" @onclick="() => RemoverDelCarrito(item)">
+                                    <i class="bi bi-trash3"></i>
+                                </button>
+                            </li>
+                        }
+                    </ul>
+                    <div class="d-flex justify-content-between align-items-center fw-bold border-top pt-3">
+                        <span>Total:</span>
+                        <span>@carrito.Sum(p => p.Precio).ToString("C")</span>
+                    </div>
+                    <div class="d-grid mt-3">
+                        <button class="btn btn-success">Proceder al Pago</button>
+                    </div>
+                }
+                else
+                {
+                    <p class="text-center text-muted">Tu carrito está vacío.</p>
+                }
             </div>
         }
     </div>
-
-}else
+}
+else
 {
-
+    <p class="text-center p-5">Verificando acceso...</p>
 }
 
-
-@if (carrito.Count > 0)
-{
-    <div class="mt-6 border-t pt-4">
-        <h2 class="text-xl font-bold">Carrito</h2>
-        <ul>
-            @foreach (var item in carrito)
-            {
-                <li>@item.Nombre - @item.Precio.ToString("C")</li>
-            }
-        </ul>
-        <p class="font-semibold mt-2">Total: @carrito.Sum(p => p.Precio).ToString("C")</p>
-    </div>
-}
 
 @code {
-    private bool isAllowedToView = false; 
+    private bool isAllowedToView = false;
+    private List<Producto> productos = new();
+    private List<Producto> carrito = new();
+
+    // Para el modal de notificación
+    private bool showNotificationModal = false;
+    private string notificationMessage = "";
+
+    // Para mostrar/ocultar la sección del carrito
+    private bool showCarrito = false;
 
     protected override void OnInitialized()
     {
-        Console.WriteLine($"Products.razor OnInitialized. Current Auth State: LoggedIn={AuthStateService.IsLoggedIn}, User={AuthStateService.Username}");
-
         if (!AuthStateService.IsLoggedIn)
         {
-            Console.WriteLine("Products.razor: User not logged in. Redirecting to /login.");
-            // Si no está logueado, redirigir a la página de login.
-            // 'replace: true' es bueno para que el usuario no pueda usar "Atrás" para volver
-            // a la página de productos sin estar logueado.
             NavigationManager.NavigateTo("/login", replace: true);
         }
         else
         {
-            Console.WriteLine("Products.razor: User is logged in. Allowing view.");
-            // Si está logueado, permitir que se muestre el contenido de la página.
             isAllowedToView = true;
+            CargarProductos();
         }
         base.OnInitialized();
     }
 
-
-    private List<Producto> productos = new()
+    private void CargarProductos()
     {
-        new Producto { Nombre = "Biga", Precio = 999.99m, ImagenUrl = "https://via.placeholder.com/200x150?text=Laptop" },
-        new Producto { Nombre = "Ladrillo", Precio = 699.99m, ImagenUrl = "https://via.placeholder.com/200x150?text=Smartphone" },
-        new Producto { Nombre = "Cemento", Precio = 149.99m, ImagenUrl = "https://via.placeholder.com/200x150?text=Audifonos" },
-        new Producto { Nombre = "Pala", Precio = 89.99m, ImagenUrl = "https://via.placeholder.com/200x150?text=Teclado" },
-        new Producto { Nombre = "Escoba", Precio = 399.99m, ImagenUrl = "https://via.placeholder.com/200x150?text=Monitor" },
-    };
+        productos = new()
+        {
+            new Producto { Id = 1, Nombre = "Biga", Precio = 999.99m, ImagenUrl = "https://via.placeholder.com/300x200?text=Biga" },
+            new Producto { Id = 2, Nombre = "Ladrillo", Precio = 699.99m, ImagenUrl = "https://via.placeholder.com/300x200?text=Ladrillo" },
+            new Producto { Id = 3, Nombre = "Cemento", Precio = 149.99m, ImagenUrl = "https://via.placeholder.com/300x200?text=Cemento" },
+            new Producto { Id = 4, Nombre = "Pala", Precio = 89.99m, ImagenUrl = "https://via.placeholder.com/300x200?text=Pala" },
+            new Producto { Id = 5, Nombre = "Escoba", Precio = 399.99m, ImagenUrl = "https://via.placeholder.com/300x200?text=Escoba" },
+            new Producto { Id = 6, Nombre = "Taladro Inalámbrico", Precio = 129.99m, ImagenUrl = "https://via.placeholder.com/300x200?text=Taladro" },
+            new Producto { Id = 7, Nombre = "Set de Herramientas", Precio = 79.50m, ImagenUrl = "https://via.placeholder.com/300x200?text=Herramientas" },
+            new Producto { Id = 8, Nombre = "Pintura Blanca (1 Gal)", Precio = 25.00m, ImagenUrl = "https://via.placeholder.com/300x200?text=Pintura" },
+        };
+    }
 
-    private List<Producto> carrito = new();
-
-    private void AgregarAlCarrito(Producto producto)
+    private void AgregarAlCarritoYMostrarNotificacion(Producto producto)
     {
-        carrito.Add(producto);
+        var itemExistente = carrito.FirstOrDefault(p => p.Id == producto.Id);
+        if (itemExistente == null) // Solo añadir si no existe para este ejemplo simple
+        {
+            carrito.Add(producto);
+            notificationMessage = $"¡'{producto.Nombre}' ha sido agregado a tu carrito!";
+        }
+        else
+        {
+            // Opcional: Incrementar cantidad si ya existe, o mostrar otro mensaje
+            notificationMessage = $"'{producto.Nombre}' ya está en tu carrito.";
+        }
+        showNotificationModal = true;
+    }
+
+    private void RemoverDelCarrito(Producto producto)
+    {
+        carrito.Remove(producto);
+        if (!carrito.Any())
+        {
+            showCarrito = false; // Ocultar sección del carrito si está vacío
+        }
+    }
+
+    private void CerrarModalNotificacion()
+    {
+        showNotificationModal = false;
+    }
+
+    private void ToggleCarritoDisplay()
+    {
+        showCarrito = !showCarrito;
     }
 
     public class Producto
     {
+        public int Id { get; set; } // Importante para manejar el carrito
         public string? Nombre { get; set; }
         public decimal Precio { get; set; }
         public string? ImagenUrl { get; set; }
     }
 }
-

@@ -1,28 +1,28 @@
-﻿<!-- Components/Layout/NavMenu.razor -->
-@inject NavigationManager NavigationManager
-@inject ECommerceServer.Src.Services.SimulatedAuthStateService AuthStateService 
+﻿@inherits LayoutComponentBase
 
-<!-- Components/Layout/MainLayout.razor -->
-@inherits LayoutComponentBase
+<div class="page-wrapper d-flex flex-column min-vh-100"> @* Contenedor principal de la página *@
 
-<div class="page">
-    <div class="sidebar">
-        @* Hacemos que la INSTANCIA de NavMenu sea interactiva *@
-        <NavMenu @rendermode="InteractiveServer" />
-    </div>
+    <header class="app-header sticky-top shadow-sm"> @* 'sticky-top' de Bootstrap para que se quede arriba al hacer scroll, 'shadow-sm' para una sombra sutil *@
+        <NavMenu @rendermode="InteractiveServer" /> @* Aquí va nuestro NavMenu, que ahora es una navbar *@
+    </header>
 
-    <main>
+    <main class="app-content flex-grow-1 container-fluid py-4"> @* 'flex-grow-1' para que el contenido principal ocupe el espacio restante, 'container-fluid' para padding y responsividad, 'py-4' para padding vertical *@
+        @* La barra "top-row" original que tenías podría ir aquí si aún la necesitas, o ser parte del NavMenu, o eliminarse.
+           Por ahora, la comentaré para enfocarnos en la estructura principal.
         <div class="top-row px-4">
             <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
         </div>
-
-        <!-- ... estructura del layout ... -->
-        <article class="content px-4">
-            @Body  <!-- AQUÍ SE RENDERIZA EL CONTENIDO DE LOGIN.RAZOR -->
+        *@
+        <article class="content"> @* No necesita 'px-4' si el 'container-fluid' ya lo maneja *@
+            @Body
         </article>
-        <!-- ... -->
-        
     </main>
+
+    <footer class="app-footer mt-auto py-3 bg-light border-top"> @* 'mt-auto' empuja el footer al fondo, 'border-top' para una línea de separación *@
+        <div class="container text-center">
+            <span class="text-muted">© @DateTime.Now.Year E-Shop Demo. Todos los derechos reservados.</span>
+        </div>
+    </footer>
 </div>
 
 <div id="blazor-error-ui">

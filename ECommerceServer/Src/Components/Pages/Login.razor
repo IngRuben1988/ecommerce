@@ -1,63 +1,69 @@
 <!-- Components/Pages/Login.razor -->
 @page "/login"
-@* No tiene una directiva @layout explícita *@
 @rendermode InteractiveServer
-<!-- ... contenido del login ... -->
 @inject NavigationManager NavigationManager
 @inject ECommerceServer.Src.Services.SimulatedAuthStateService AuthStateService
 
-@* ... (el HTML del formulario de login no cambia) ... *@
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6 col-lg-4">
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="text-center">Iniciar Sesión</h3>
+<div class="login-container d-flex align-items-center justify-content-center">
+    <div class="col-md-6 col-lg-4 col-xl-3"> @* Ajusta el ancho de la tarjeta *@
+        <div class="card shadow-lg login-card"> @* Sombra más pronunciada y clase personalizada *@
+            <div class="card-header bg-primary text-white"> @* Cabecera con color primario *@
+                <div class="text-center py-2">
+                    @* Aquí podrías poner un logo si tienes uno *@
+                    @* <img src="/images/logo-login.png" alt="Logo" style="max-height: 50px; margin-bottom: 10px;" /> *@
+                    <h3 class="mb-0">Iniciar Sesión</h3>
+                    <small class="text-white-50">Accede a tu cuenta de E-Shop Demo</small>
                 </div>
-                <div class="card-body">
-                    @if (!string.IsNullOrEmpty(errorMessage))
-                    {
-                        <div class="alert alert-danger" role="alert">
-                            @errorMessage
-                        </div>
-                    }
+            </div>
+            <div class="card-body p-4"> @* Más padding en el card-body *@
+                @if (!string.IsNullOrEmpty(errorMessage))
+                {
+                    <div class="alert alert-danger" role="alert">
+                        @errorMessage
+                    </div>
+                }
 
-                    <EditForm Model="@loginModel" OnValidSubmit="HandleLoginAsync">
-                        <DataAnnotationsValidator />
+                <EditForm Model="@loginModel" OnValidSubmit="HandleLoginAsync">
+                    <DataAnnotationsValidator />
 
-                        <div class="mb-3">
-                            <label for="username" class="form-label">Usuario:</label>
-                            <InputText id="username" class="form-control" @bind-Value="loginModel.Username" placeholder="admin" />
-                            <ValidationMessage For="@(() => loginModel.Username)" />
-                        </div>
+                    <div class="mb-3 form-floating"> @* form-floating para labels flotantes *@
+                        <InputText id="username" class="form-control" @bind-Value="loginModel.Username" placeholder="usuario" />
+                        <label for="username"><i class="bi bi-person-fill me-2"></i>Usuario:</label>
+                        <ValidationMessage For="@(() => loginModel.Username)" />
+                    </div>
 
-                        <div class="mb-3">
-                            <label for="password" class="form-label">Contraseña:</label>
-                            <InputText id="password" type="password" class="form-control" @bind-Value="loginModel.Password" placeholder="password" />
-                            <ValidationMessage For="@(() => loginModel.Password)" />
-                        </div>
+                    <div class="mb-3 form-floating">
+                        <InputText id="password" type="password" class="form-control" @bind-Value="loginModel.Password" placeholder="contraseña" />
+                        <label for="password"><i class="bi bi-lock-fill me-2"></i>Contraseña:</label>
+                        <ValidationMessage For="@(() => loginModel.Password)" />
+                    </div>
 
-                        <div class="d-grid">
-                            <button type="submit" class="btn btn-primary">Entrar</button>
-                        </div>
-                    </EditForm>
-                </div>
-                <div class="card-footer text-center">
-                    <small>© @DateTime.Now.Year E-Shop Demo</small>
-                </div>
+                    <div class="d-grid mb-3">
+                        <button type="submit" class="btn btn-primary btn-lg"> @* Botón más grande *@
+                            <i class="bi bi-box-arrow-in-right me-2"></i>Entrar
+                        </button>
+                    </div>
+
+                    <div class="text-center">
+                        <a href="/forgot-password" class="text-decoration-none me-3"><small>¿Olvidaste tu contraseña?</small></a>
+                        <a href="/register" class="text-decoration-none"><small>Crear una cuenta</small></a>
+                    </div>
+                </EditForm>
+            </div>
+            <div class="card-footer text-center py-3">
+                <small class="text-muted">© @DateTime.Now.Year E-Shop Demo</small>
             </div>
         </div>
     </div>
 </div>
 
-
 @code {
+    // ... (tu código C# existente no cambia) ...
     private LoginInputModel loginModel = new LoginInputModel();
     private string? errorMessage;
 
     protected override void OnInitialized()
     {
-        // Si el usuario ya está "logueado" y navega a /login, redirigirlo.
         if (AuthStateService.IsLoggedIn)
         {
             NavigationManager.NavigateTo("/");
@@ -67,30 +73,26 @@
     private async Task HandleLoginAsync()
     {
         errorMessage = null;
-
         if (loginModel.Username == "admin" && loginModel.Password == "password")
         {
-            AuthStateService.Login(loginModel.Username); // Llama al servicio para "loguear"
-            NavigationManager.NavigateTo("/", forceLoad: true); // forceLoad puede ayudar a que NavMenu refresque
+            AuthStateService.Login(loginModel.Username);
+            NavigationManager.NavigateTo("/", forceLoad: true);
         }
         else if (loginModel.Username == "user" && loginModel.Password == "1234")
         {
             AuthStateService.Login(loginModel.Username);
-            NavigationManager.NavigateTo("/products", forceLoad: true); // Ejemplo
+            NavigationManager.NavigateTo("/products", forceLoad: true);
         }
         else
         {
             errorMessage = "Usuario o contraseña incorrectos.";
         }
-        // No es estrictamente necesario 'await Task.CompletedTask;' si el método ya es async
-        // debido a otras llamadas await, pero no hace daño.
     }
 
     public class LoginInputModel
     {
         [System.ComponentModel.DataAnnotations.Required(ErrorMessage = "El nombre de usuario es obligatorio.")]
         public string Username { get; set; } = string.Empty;
-
         [System.ComponentModel.DataAnnotations.Required(ErrorMessage = "La contraseña es obligatoria.")]
         public string Password { get; set; } = string.Empty;
     }

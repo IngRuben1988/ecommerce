@@ -1,0 +1,43 @@
+/* Asegura que el contenedor del login use toda la altura disponible si el layout lo permite */
+/* Esto es más para el div que envuelve la tarjeta dentro de Login.razor */
+::deep .login-container {
+    min-height: 80vh; /* O ajusta según la altura de tu navbar si LoginLayout usara MainLayout */
+                      /* Si LoginLayout es independiente, podría ser 100vh para el contenedor interno */
+}
+
+::deep .login-card {
+    border: none; /* Quitar el borde por defecto si usamos sombra */
+    border-radius: 0.5rem; /* Bordes más redondeados */
+}
+
+/* Para los form-floating, asegurar que los iconos no se solapen mal */
+::deep .form-floating > .form-control:not(:-moz-placeholder-shown) ~ label i, /* Firefox */
+::deep .form-floating > .form-control:not(:placeholder-shown) ~ label i { /* Otros navegadores */
+    /* Ajustes si el icono dentro del label flotante se ve mal cuando el input tiene valor */
+    /* Por ejemplo, podrías necesitar ajustar el 'transform' del label o el padding del input */
+}
+
+::deep .form-floating > label {
+    padding: 1rem 0.75rem 1rem 2.5rem; /* Añadir padding izquierdo para el icono */
+}
+
+::deep .form-floating > label i {
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6c757d; /* Color del icono */
+}
+
+/* Estilo para el botón de login */
+::deep .btn-primary {
+    /* Puedes personalizar más el botón aquí si lo deseas */
+    /* background-color: #0056b3; */
+    /* border-color: #0056b3; */
+}
+
+::deep .card-header.bg-primary {
+    border-bottom: none; /* Quitar el borde inferior de la cabecera de la tarjeta */
+    border-top-left-radius: 0.5rem; /* Redondear con la tarjeta */
+    border-top-right-radius: 0.5rem;
+}

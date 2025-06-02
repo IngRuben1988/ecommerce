@@ -1,0 +1,11 @@
+<!-- Components/Layout/LoginLayout.razor -->
+@inherits LayoutComponentBase
+
+<div class="login-page-background min-vh-100 d-flex flex-column">
+    @* No hay header ni navmenu aquí, solo el contenido del login *@
+    <main class="flex-grow-1">
+        @Body
+    </main>
+</div>
+
+@* No necesitas el div #blazor-error-ui aquí si ya está en MainLayout y esta página no debería mostrarlo *@

@@ -1,0 +1,15 @@
+@inherits LayoutComponentBase
+
+<div class="product-section-container container-fluid">
+    <div class="row">
+        <aside class="col-md-3 product-filters-sidebar">
+            <h4>Filtros</h4>
+            <!-- Aquí irían los componentes de filtro -->
+            <p>Filtro por categoría...</p>
+            <p>Filtro por precio...</p>
+        </aside>
+        <main class="col-md-9 product-content-area">
+            @Body @* Aquí se renderizaría Products.razor o ProductDetail.razor *@
+        </main>
+    </div>
+</div>

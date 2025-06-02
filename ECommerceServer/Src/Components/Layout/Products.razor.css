@@ -1,0 +1,40 @@
+/* Components/Pages/Products.razor.css (o app.css) */
+
+/* Estilo para las tarjetas de producto */
+::deep .product-card {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+::deep .product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important; /* !important para sobrescribir shadow-sm si es necesario */
+}
+
+::deep .product-image {
+    /* Asegura que la imagen no se desborde y mantenga proporción si es necesario */
+    max-height: 200px; /* Ajusta según tus imágenes */
+    object-fit: contain; /* 'cover' puede recortar, 'contain' asegura que se vea toda */
+    padding: 0.5rem; /* Un pequeño padding alrededor de la imagen dentro de la card */
+}
+
+::deep .product-name {
+    font-size: 1rem; /* Tamaño de fuente para el nombre del producto */
+    font-weight: 500;
+    min-height: 3em; /* Para alinear nombres de producto de varias líneas */
+}
+
+::deep .product-price {
+    font-size: 1.1rem;
+    color: #198754; /* Verde de Bootstrap para éxito/precio */
+    font-weight: bold;
+}
+
+::deep .add-to-cart-btn {
+    /* Puedes personalizar más el botón de agregar */
+    /* font-weight: 500; */
+}
+
+/* Estilo para el botón del carrito en la cabecera de la página */
+::deep .btn-outline-primary.position-relative .badge {
+    font-size: 0.7em; /* Hacer el contador del carrito un poco más pequeño */
+}
