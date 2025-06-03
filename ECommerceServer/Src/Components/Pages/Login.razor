@@ -58,10 +58,10 @@
 </div>
 
 @code {
-    // ... (tu código C# existente no cambia) ...
     private LoginInputModel loginModel = new LoginInputModel();
     private string? errorMessage;
-
+    
+    <summary>Metodo inicialización</summary>
     protected override void OnInitialized()
     {
         if (AuthStateService.IsLoggedIn)
@@ -70,6 +70,7 @@
         }
     }
 
+    <summary>Metodo para controlar login asíncrono </summary>
     private async Task HandleLoginAsync()
     {
         errorMessage = null;
